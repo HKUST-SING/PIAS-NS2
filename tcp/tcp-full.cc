@@ -216,7 +216,7 @@ FullTcpAgent::delay_bind_dispatch(const char *varName, const char *localName, Tc
 	if (delay_bind(varName, localName, "deadline", &deadline, tracer)) return TCL_OK; //Shuang
 	if (delay_bind(varName, localName, "early_terminated_", &early_terminated_, tracer)) return TCL_OK; //Shuang
 
-    if (delay_bind(varName, localName, "enable_pias_", &enable_pias_, tracer)) return TCL_OK; //wei
+    if (delay_bind_bool(varName, localName, "enable_pias_", &enable_pias_, tracer)) return TCL_OK; //wei
     if (delay_bind(varName, localName, "pias_prio_num_", &pias_prio_num_, tracer)) return TCL_OK;
     if (delay_bind(varName, localName, "pias_thresh_0", &pias_thresh_[0], tracer)) return TCL_OK;
     if (delay_bind(varName, localName, "pias_thresh_1", &pias_thresh_[1], tracer)) return TCL_OK;
@@ -225,7 +225,7 @@ FullTcpAgent::delay_bind_dispatch(const char *varName, const char *localName, Tc
     if (delay_bind(varName, localName, "pias_thresh_4", &pias_thresh_[4], tracer)) return TCL_OK;
     if (delay_bind(varName, localName, "pias_thresh_5", &pias_thresh_[5], tracer)) return TCL_OK;
     if (delay_bind(varName, localName, "pias_thresh_6", &pias_thresh_[6], tracer)) return TCL_OK;
-    if (delay_bind(varName, localName, "pias_debug_", &pias_debug_, tracer)) return TCL_OK;
+    if (delay_bind_bool(varName, localName, "pias_debug_", &pias_debug_, tracer)) return TCL_OK;
 
         return TcpAgent::delay_bind_dispatch(varName, localName, tracer);
 }
@@ -1052,9 +1052,16 @@ FullTcpAgent::sendpacket(int seqno, int ackno, int pflags, int datalen, int reas
     /* PIAS packet tagging */
     if(enable_pias_)
     {
-        iph->prio()=piasPrio(seqno-startseq_);
-        if(pias_debug_)
-            printf("Packet prio is %d when bytes sent is %d\n", iph->prio(),seqno-startseq_);
+        if(datalen>0)
+        {
+            iph->prio()=piasPrio(seqno-startseq_);
+            if(pias_debug_)
+                printf("Packet prio is %d when bytes sent is %d\n", iph->prio(),seqno-startseq_);
+        }
+        else
+        {
+            iph->prio()=0;
+        }
     }
 
 	send(p, 0);
