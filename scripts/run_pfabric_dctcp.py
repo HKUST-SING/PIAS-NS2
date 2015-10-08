@@ -18,7 +18,7 @@ link_rate=10
 mean_link_delay=0.0000002
 host_delay=0.000020
 queueSize=140
-load_arr=[0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
+load_arr=[0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
 connections_per_pair=1
 meanFlowSize=1138*1460
 paretoShape=1.05
@@ -35,7 +35,7 @@ min_rto=0.000250
 prob_cap_=5
 
 switchAlg='DropTail'
-DCTCP_K=80.0
+DCTCP_K=65.0
 drop_prio_='true'
 prio_scheme_arr=[2,3]
 deque_prio_='true'
