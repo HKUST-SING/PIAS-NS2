@@ -119,15 +119,25 @@ if {[string compare $sourceAlg "DCTCP-Sack"] == 0} {
 Agent/TCP/FullTcp set prio_scheme_ $prio_scheme_;
 Agent/TCP/FullTcp set dynamic_dupack_ 1000000; #disable dupack
 Agent/TCP set window_ 1000000
-Agent/TCP set windowInit_ 12
+Agent/TCP set windowInit_ 70
 Agent/TCP set rtxcur_init_ $min_rto;
 Agent/TCP/FullTcp/Sack set clear_on_timeout_ false;
 Agent/TCP/FullTcp/Sack set sack_rtx_threshmode_ 2;
 Agent/TCP/FullTcp set prob_cap_ $prob_cap_;
 
+Agent/TCP/FullTcp set enable_pias_ false;
+Agent/TCP/FullTcp set pias_prio_num_ 0
+Agent/TCP/FullTcp set pias_debug_ false
+Agent/TCP/FullTcp set pias_thresh_0 0
+Agent/TCP/FullTcp set pias_thresh_1 0
+Agent/TCP/FullTcp set pias_thresh_2 0
+Agent/TCP/FullTcp set pias_thresh_3 0
+Agent/TCP/FullTcp set pias_thresh_4 0
+Agent/TCP/FullTcp set pias_thresh_5 0
+Agent/TCP/FullTcp set pias_thresh_6 0
+
 #Whether we enable PIAS
-if {[string compare $switchAlg "Priority"] == 0} {
-    puts "Enable PIAS"
+if {[string compare $switchAlg "Priority"] == 0 } {
     Agent/TCP/FullTcp set enable_pias_ true;
     Agent/TCP/FullTcp set pias_prio_num_ $prio_num_
     Agent/TCP/FullTcp set pias_debug_ false
