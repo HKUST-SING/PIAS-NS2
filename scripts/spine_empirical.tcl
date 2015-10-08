@@ -93,8 +93,6 @@ Agent/TCP set old_ecn_ 1
 Agent/TCP set packetSize_ $pktSize
 Agent/TCP/FullTcp set segsize_ $pktSize
 Agent/TCP/FullTcp set spa_thresh_ 0
-Agent/TCP set window_ 64
-Agent/TCP set windowInit_ 2
 Agent/TCP set slow_start_restart_ $slowstartrestart
 Agent/TCP set windowOption_ 0
 Agent/TCP set minrto_ $min_rto
@@ -125,7 +123,7 @@ Agent/TCP/FullTcp/Sack set clear_on_timeout_ false;
 Agent/TCP/FullTcp/Sack set sack_rtx_threshmode_ 2;
 Agent/TCP/FullTcp set prob_cap_ $prob_cap_;
 
-Agent/TCP/FullTcp set enable_pias_ false;
+Agent/TCP/FullTcp set enable_pias_ false
 Agent/TCP/FullTcp set pias_prio_num_ 0
 Agent/TCP/FullTcp set pias_debug_ false
 Agent/TCP/FullTcp set pias_thresh_0 0
@@ -138,7 +136,7 @@ Agent/TCP/FullTcp set pias_thresh_6 0
 
 #Whether we enable PIAS
 if {[string compare $switchAlg "Priority"] == 0 } {
-    Agent/TCP/FullTcp set enable_pias_ true;
+    Agent/TCP/FullTcp set enable_pias_ true
     Agent/TCP/FullTcp set pias_prio_num_ $prio_num_
     Agent/TCP/FullTcp set pias_debug_ false
     Agent/TCP/FullTcp set pias_thresh_0 $pias_thresh_0
@@ -150,10 +148,10 @@ if {[string compare $switchAlg "Priority"] == 0 } {
     Agent/TCP/FullTcp set pias_thresh_6 $pias_thresh_6
 }
 
-if {$queueSize > 12} {
+if {$queueSize > 70} {
    Agent/TCP set maxcwnd_ [expr $queueSize - 1];
 } else {
-   Agent/TCP set maxcwnd_ 12;
+   Agent/TCP set maxcwnd_ 70;
 }
 
 set myAgent "Agent/TCP/FullTcp/Sack/MinTCP";
