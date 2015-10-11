@@ -1,5 +1,6 @@
 import threading
 import os
+import sys
 
 class SimThread(threading.Thread):
 	def __init__(self, cmd, directory_name):
@@ -28,6 +29,8 @@ enableMultiPath=1
 perflowMP=0
 
 sourceAlg='DCTCP-Sack'
+#sourceAlg='LLDCT-Sack'
+initWindow=70
 ackRatio=1
 slowstartrestart='true'
 DCTCP_g=0.0625
@@ -35,7 +38,7 @@ min_rto=0.002
 prob_cap_=5
 
 switchAlg='Priority'
-DCTCP_K=65.0
+DCTCP_K=80.0
 drop_prio_='true'
 prio_scheme_=2
 deque_prio_='true'
@@ -64,11 +67,19 @@ max_thread_num=18
 
 for prio_num_ in prio_num_arr:
 	for load in load_arr:
+
 		scheme='unknown'
-		if switchAlg=='Priority' and prio_num_>1 :
+		if switchAlg=='Priority' and prio_num_>1 and sourceAlg=='DCTCP-Sack':
 			scheme='pias'
 		elif switchAlg=='Priority' and prio_num_==1:
-			scheme='dctcp'
+			if sourceAlg=='DCTCP-Sack':
+				scheme='dctcp'
+			elif sourceAlg=='LLDCT-Sack':
+				scheme='lldct'
+
+		if scheme=='unknown':
+			print 'Unknown scheme'
+			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
 		directory_name='websearch_%s_%d' % (scheme,int(load*10))
@@ -88,6 +99,7 @@ for prio_num_ in prio_num_arr:
 			+str(enableMultiPath)+' '\
 			+str(perflowMP)+' '\
 			+str(sourceAlg)+' '\
+			+str(initWindow)+' '\
 			+str(ackRatio)+' '\
 			+str(slowstartrestart)+' '\
 			+str(DCTCP_g)+' '\

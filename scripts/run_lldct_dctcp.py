@@ -1,5 +1,6 @@
 import threading
 import os
+import sys
 
 class SimThread(threading.Thread):
 	def __init__(self, cmd, directory_name):
@@ -17,7 +18,7 @@ sim_end=100000
 link_rate=10
 mean_link_delay=0.0000002
 host_delay=0.000020
-queueSize=140
+queueSize=267
 load_arr=[0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
 connections_per_pair=1
 meanFlowSize=1138*1460
@@ -27,21 +28,22 @@ flow_cdf='CDF_dctcp.tcl'
 enableMultiPath=1
 perflowMP=0
 
-sourceAlg='DCTCP-Sack'
+#sourceAlg='DCTCP-Sack'
+sourceAlg='LLDCT-Sack'
 initWindow=70
 ackRatio=1
 slowstartrestart='true'
 DCTCP_g=0.0625
-min_rto=0.000250
+min_rto=0.002
 prob_cap_=5
 
-switchAlg='DropTail'
-DCTCP_K=65.0
+switchAlg='Priority'
+DCTCP_K=80.0
 drop_prio_='true'
-prio_scheme_arr=[2,3]
+prio_scheme_=2
 deque_prio_='true'
 keep_order_='true'
-prio_num_=1
+prio_num_arr=[1]
 ECN_scheme_=2 #Per-port ECN marking
 pias_thresh_0=46*1460
 pias_thresh_1=1084*1460
@@ -63,14 +65,21 @@ threads=[]
 max_thread_num=18
 
 
-for prio_scheme_ in prio_scheme_arr:
+for prio_num_ in prio_num_arr:
 	for load in load_arr:
-		scheme='unknown'
 
-		if prio_scheme_==2:
-			scheme='pfabric_remainingSize'
-		elif prio_scheme_==3:
-			scheme='pfabric_bytesSent'
+		scheme='unknown'
+		if switchAlg=='Priority' and prio_num_>1 and sourceAlg=='DCTCP-Sack':
+			scheme='pias'
+		elif switchAlg=='Priority' and prio_num_==1:
+			if sourceAlg=='DCTCP-Sack':
+				scheme='dctcp'
+			elif sourceAlg=='LLDCT-Sack':
+				scheme='lldct'
+
+		if scheme=='unknown':
+			print 'Unknown scheme'
+			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
 		directory_name='websearch_%s_%d' % (scheme,int(load*10))

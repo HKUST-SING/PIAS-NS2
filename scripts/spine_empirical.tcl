@@ -4,7 +4,7 @@ set ns [new Simulator]
 puts "Date: [clock format [clock seconds]]"
 set sim_start [clock seconds]
 
-if {$argc != 38} {
+if {$argc != 39} {
     puts "wrong number of arguments $argc"
     exit 0
 }
@@ -26,37 +26,38 @@ set perflowMP [lindex $argv 11]
 
 #### Transport settings options
 set sourceAlg [lindex $argv 12] ; # Sack or DCTCP-Sack
-set ackRatio [lindex $argv 13]
-set slowstartrestart [lindex $argv 14]
-set DCTCP_g [lindex $argv 15] ; # DCTCP alpha estimation gain
-set min_rto [lindex $argv 16]
-set prob_cap_ [lindex $argv 17] ; # Threshold of consecutive timeouts to trigger probe mode
+set initWindow [lindex $argv 13]
+set ackRatio [lindex $argv 14]
+set slowstartrestart [lindex $argv 15]
+set DCTCP_g [lindex $argv 16] ; # DCTCP alpha estimation gain
+set min_rto [lindex $argv 17]
+set prob_cap_ [lindex $argv 18] ; # Threshold of consecutive timeouts to trigger probe mode
 
 #### Switch side options
-set switchAlg [lindex $argv 18] ; # DropTail (pFabric), RED (DCTCP) or Priority (PIAS)
-set DCTCP_K [lindex $argv 19]
-set drop_prio_ [lindex $argv 20]
-set prio_scheme_ [lindex $argv 21]
-set deque_prio_ [lindex $argv 22]
-set keep_order_ [lindex $argv 23]
-set prio_num_ [lindex $argv 24]
-set ECN_scheme_ [lindex $argv 25]
-set pias_thresh_0 [lindex $argv 26]
-set pias_thresh_1 [lindex $argv 27]
-set pias_thresh_2 [lindex $argv 28]
-set pias_thresh_3 [lindex $argv 29]
-set pias_thresh_4 [lindex $argv 30]
-set pias_thresh_5 [lindex $argv 31]
-set pias_thresh_6 [lindex $argv 32]
+set switchAlg [lindex $argv 19] ; # DropTail (pFabric), RED (DCTCP) or Priority (PIAS)
+set DCTCP_K [lindex $argv 20]
+set drop_prio_ [lindex $argv 21]
+set prio_scheme_ [lindex $argv 22]
+set deque_prio_ [lindex $argv 23]
+set keep_order_ [lindex $argv 24]
+set prio_num_ [lindex $argv 25]
+set ECN_scheme_ [lindex $argv 26]
+set pias_thresh_0 [lindex $argv 27]
+set pias_thresh_1 [lindex $argv 28]
+set pias_thresh_2 [lindex $argv 29]
+set pias_thresh_3 [lindex $argv 30]
+set pias_thresh_4 [lindex $argv 31]
+set pias_thresh_5 [lindex $argv 32]
+set pias_thresh_6 [lindex $argv 33]
 
 #### topology
-set topology_spt [lindex $argv 33]
-set topology_tors [lindex $argv 34]
-set topology_spines [lindex $argv 35]
-set topology_x [lindex $argv 36]
+set topology_spt [lindex $argv 34]
+set topology_tors [lindex $argv 35]
+set topology_spines [lindex $argv 36]
+set topology_x [lindex $argv 37]
 
 ### result file
-set flowlog [open [lindex $argv 37] w]
+set flowlog [open [lindex $argv 38] w]
 
 #### Packet size is in bytes.
 set pktSize 1460
@@ -70,13 +71,13 @@ puts "topology: spines server per rack = $topology_spt, x = $topology_x"
 puts "sim_end $sim_end"
 puts "link_rate $link_rate Gbps"
 puts "link_delay $mean_link_delay sec"
-puts "RTT  [expr $mean_link_delay * 2.0 * 6] sec"
 puts "host_delay $host_delay sec"
 puts "queue size $queueSize pkts"
 puts "load $load"
 puts "connections_per_pair $connections_per_pair"
 puts "enableMultiPath=$enableMultiPath, perflowMP=$perflowMP"
 puts "source algorithm: $sourceAlg"
+puts "TCP initial window: $initWindow"
 puts "ackRatio $ackRatio"
 puts "DCTCP_g $DCTCP_g"
 puts "slow-start Restart $slowstartrestart"
@@ -98,6 +99,9 @@ Agent/TCP set windowOption_ 0
 Agent/TCP set minrto_ $min_rto
 Agent/TCP set tcpTick_ 0.000001
 Agent/TCP set maxrto_ 64
+Agent/TCP set lldct_w_min_ 0.125
+Agent/TCP set lldct_w_max_ 2.5
+Agent/TCP set lldct_w_c_ 2.5
 
 Agent/TCP/FullTcp set nodelay_ true; # disable Nagle
 Agent/TCP/FullTcp set segsperack_ $ackRatio;
@@ -110,14 +114,22 @@ if {$ackRatio > 2} {
 if {[string compare $sourceAlg "DCTCP-Sack"] == 0} {
     Agent/TCP set ecnhat_ true
     Agent/TCPSink set ecnhat_ true
+    Agent/TCP set ecnhat_g_ $DCTCP_g
+    Agent/TCP set lldct_ false
+
+} elseif {[string compare $sourceAlg "LLDCT-Sack"] == 0} {
+    Agent/TCP set ecnhat_ true
+    Agent/TCPSink set ecnhat_ true
     Agent/TCP set ecnhat_g_ $DCTCP_g;
+    Agent/TCP set lldct_ true
+
 }
 
 #Shuang
 Agent/TCP/FullTcp set prio_scheme_ $prio_scheme_;
 Agent/TCP/FullTcp set dynamic_dupack_ 1000000; #disable dupack
 Agent/TCP set window_ 1000000
-Agent/TCP set windowInit_ 70
+Agent/TCP set windowInit_ $initWindow
 Agent/TCP set rtxcur_init_ $min_rto;
 Agent/TCP/FullTcp/Sack set clear_on_timeout_ false;
 Agent/TCP/FullTcp/Sack set sack_rtx_threshmode_ 2;
@@ -148,10 +160,10 @@ if {[string compare $switchAlg "Priority"] == 0 } {
     Agent/TCP/FullTcp set pias_thresh_6 $pias_thresh_6
 }
 
-if {$queueSize > 70} {
+if {$queueSize > $initWindow } {
    Agent/TCP set maxcwnd_ [expr $queueSize - 1];
 } else {
-   Agent/TCP set maxcwnd_ 70;
+   Agent/TCP set maxcwnd_ $initWindow
 }
 
 set myAgent "Agent/TCP/FullTcp/Sack/MinTCP";
