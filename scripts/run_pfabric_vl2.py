@@ -73,7 +73,7 @@ for prio_scheme_ in prio_scheme_arr:
 			scheme='pfabric_bytesSent'
 
 		#Directory name: workload_scheme_load_[load]
-		directory_name='websearch_%s_%d' % (scheme,int(load*10))
+		directory_name='datamining_%s_%d' % (scheme,int(load*10))
 		directory_name=directory_name.lower()
 		#Simulation command
 		cmd=ns_path+' '+sim_script+' '\
