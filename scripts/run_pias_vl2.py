@@ -77,8 +77,8 @@ for prio_num_ in prio_num_arr:
 				scheme='lldct'
 
 		if scheme=='unknown':
-        	print 'Unknown scheme'
-        	sys.exit(0)
+			print 'Unknown scheme'
+			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
 		directory_name='datamining_%s_%d' % (scheme,int(load*10))
