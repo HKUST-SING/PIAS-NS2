@@ -20,7 +20,7 @@ def mean(flows):
 		return flows[50*len(flows)/100]
 	else:
 		return 0
-	
+
 #GET 99% FCT
 def max(flows):
 	flows.sort()
@@ -28,8 +28,8 @@ def max(flows):
 		return flows[99*len(flows)/100]
 	else:
 		return 0
-	
-	
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", help="input file name")
 parser.add_argument("-a","--all",help="print all FCT information",action="store_true")
@@ -45,13 +45,13 @@ flows=[]
 flows_notimeouts=[];	#Flows without timeouts
 #Short flows (0,100KB)
 short_flows=[]
-short_flows_notimeouts=[];	
+short_flows_notimeouts=[];
 #Large flows (10MB,)
 large_flows=[]
-large_flows_notimeouts=[];	
+large_flows_notimeouts=[];
 #Median flows (100KB, 10MB)
 median_flows=[]
-median_flows_notimeouts=[];	
+median_flows_notimeouts=[];
 #The number of total timeouts
 timeouts=0
 
@@ -69,11 +69,11 @@ if args.input:
 		byte_size=float(pkt_size)*1460
 		time=float(line.split()[1])
 		result=time*1000
-		
+
 		#TCP timeouts
 		timeouts_num=int(line.split()[2])
 		timeouts+=timeouts_num
-		
+
 		flows.append(result)
 		#If the flow is a short flow
 		if byte_size<100*1024:
@@ -83,7 +83,7 @@ if args.input:
 			large_flows.append(result)
 		else:
 			median_flows.append(result)
-		
+
 		#If this flow does not have timeout
 		if timeouts_num==0:
 			flows_notimeouts.append(result)
@@ -95,9 +95,9 @@ if args.input:
 				large_flows_notimeouts.append(result)
 			else:
 				median_flows_notimeouts.append(result)
-		
+
 	fp.close()
-	
+
 	if args.all:
 		print "There are "+str(len(flows))+" flows in total"
 		print "There are "+str(timeouts)+" TCP timeouts in total"
@@ -106,7 +106,7 @@ if args.input:
 		print "99th percentile FCT for "+str(len(short_flows))+" flows in (0,100KB)\n"+str(max(short_flows))
 		print "Average FCT for "+str(len(median_flows))+" flows in (100KB,10MB)\n"+str(avg(median_flows))
 		print "Average FCT for "+str(len(large_flows))+" flows in (10MB,)\n"+str(avg(large_flows))
-	
+
 	#Overall FCT information
 	if args.overall:
 		#Only average FCT information
@@ -118,7 +118,7 @@ if args.input:
 		else:
 			print "Overall average FCT is:\n"+str(avg(flows))
 			print "Overall 99th percentile FCT is:\n"+str(max(flows))
-	
+
 	#FCT information for short flows
 	if args.small:
 		#Only average FCT information
@@ -130,7 +130,7 @@ if args.input:
 		else:
 			print "Average FCT for flows in (0,100KB) is:\n"+str(avg(short_flows))
 			print "99th percentile FCT for flows in (0,100KB) is:\n"+str(max(short_flows))
-	
+
 	#FCT information for median flows
 	if args.median:
 		#Only average FCT information
@@ -142,7 +142,7 @@ if args.input:
 		else:
 			print "Average FCT for flows in (100KB,10MB) is:\n"+str(avg(median_flows))
 			print "99th percentile FCT for flows in (100KB,10MB) is:\n"+str(max(median_flows))
-	
+
 	#FCT information for large flows
 	if args.large:
 		#Only average FCT information
@@ -154,8 +154,8 @@ if args.input:
 		else:
 			print "Average FCT for flows in (10MB,) is:\n"+str(avg(large_flows))
 			print "99th percentile FCT for flows in (10MB,) is:\n"+str(max(large_flows))
-	
-	
+
+
 	#print "There are "+str(len(flows_notimeouts))+" flows w/o timeouts in total"
 	#print "Overall average FCT w/o timeouts: "+str(avg(flows_notimeouts))
 	#print "Average FCT (0,100KB) w/o timeouts: "+str(len(short_flows_notimeouts))+" flows "+str(avg(short_flows_notimeouts))

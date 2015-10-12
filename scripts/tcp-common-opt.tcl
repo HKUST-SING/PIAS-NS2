@@ -724,8 +724,6 @@ proc finish {} {
     global sim_start
     global enableNAM namfile
 
-    queueTrace
-
     $ns flush-trace
     close $flowlog
 

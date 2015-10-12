@@ -1,5 +1,6 @@
 import threading
 import os
+import sys
 
 class SimThread(threading.Thread):
 	def __init__(self, cmd, directory_name):

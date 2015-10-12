@@ -1,5 +1,6 @@
 import threading
 import os
+import sys
 
 class SimThread(threading.Thread):
 	def __init__(self, cmd, directory_name):
@@ -76,9 +77,9 @@ for prio_num_ in prio_num_arr:
 			elif sourceAlg=='LLDCT-Sack':
 				scheme='lldct'
 
-        if scheme=='unknown':
-            print 'Unknown scheme'
-            sys.exit(0)
+		if scheme=='unknown':
+			print 'Unknown scheme'
+			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
 		directory_name='datamining_%s_%d' % (scheme,int(load*10))
