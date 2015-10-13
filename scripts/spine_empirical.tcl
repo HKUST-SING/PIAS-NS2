@@ -101,7 +101,8 @@ Agent/TCP set tcpTick_ 0.000001
 Agent/TCP set maxrto_ 64
 Agent/TCP set lldct_w_min_ 0.125
 Agent/TCP set lldct_w_max_ 2.5
-Agent/TCP set lldct_w_c_ 2.5
+Agent/TCP set lldct_size_min_ 204800
+Agent/TCP set lldct_size_max_ 1048576
 
 Agent/TCP/FullTcp set nodelay_ true; # disable Nagle
 Agent/TCP/FullTcp set segsperack_ $ackRatio;

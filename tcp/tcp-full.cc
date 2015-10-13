@@ -394,6 +394,8 @@ FullTcpAgent::advance_bytes(int nb)
 
 	}
 
+    ndatabytes_=0; //Reset number of data bytes sent back to 0
+
 	if (state_ == TCPS_ESTABLISHED)
 		send_much(0, REASON_NORMAL, maxburst_);
 

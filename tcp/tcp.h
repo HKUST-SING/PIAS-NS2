@@ -422,7 +422,9 @@ virtual void output(int seqno, int reason = 0);
 	int lldct_;
 	double lldct_w_min_; //0.125 by default
 	double lldct_w_max_; //2.5 by default
-	double lldct_w_c_; //(lldct_w_min,lldct_w_max)
+	double lldct_size_min_;	//200KB by default
+	double lldct_size_max_; //1MB by default
+	double lldct_w_c_;
 
 	int cong_action_;	/* Congestion Action.  True to indicate
 				   that the sender responded to congestion. */
