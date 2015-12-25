@@ -4,13 +4,13 @@ import sys
 
 class SimThread(threading.Thread):
 	def __init__(self, cmd, directory_name):
-		self.cmd=cmd
-		self.directory_name=directory_name
+		self.cmd = cmd
+		self.directory_name = directory_name
 		threading.Thread.__init__(self)
 
 	def run(self):
 		#Make directory to save results
-		os.system('mkdir '+self.directory_name)
+		os.system('mkdir ' + self.directory_name)
 		os.system(self.cmd)
 
 
@@ -67,24 +67,24 @@ max_thread_num = 18
 for prio_num_ in prio_num_arr:
 	for i in range(len(load_arr)):
 
-		scheme='unknown'
-		if switchAlg=='Priority' and prio_num_>1 and sourceAlg=='DCTCP-Sack':
-			scheme='pias'
-		elif switchAlg=='Priority' and prio_num_==1:
-			if sourceAlg=='DCTCP-Sack':
-				scheme='dctcp'
-			elif sourceAlg=='LLDCT-Sack':
-				scheme='lldct'
+		scheme = 'unknown'
+		if switchAlg == 'Priority' and prio_num_ > 1 and sourceAlg == 'DCTCP-Sack':
+			scheme = 'pias'
+		elif switchAlg == 'Priority' and prio_num_ == 1:
+			if sourceAlg == 'DCTCP-Sack':
+				scheme = 'dctcp'
+			elif sourceAlg == 'LLDCT-Sack':
+				scheme = 'lldct'
 
-		if scheme=='unknown':
+		if scheme == 'unknown':
 			print 'Unknown scheme'
 			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
-		directory_name='websearch_%s_%d' % (scheme,int(load_arr[i]*10))
-		directory_name=directory_name.lower()
+		directory_name = 'websearch_%s_%d' % (scheme,int(load_arr[i]*10))
+		directory_name = directory_name.lower()
 		#Simulation command
-		cmd=ns_path+' '+sim_script+' '\
+		cmd = ns_path+' '+sim_script+' '\
 			+str(sim_end)+' '\
 			+str(link_rate)+' '\
 			+str(mean_link_delay)+' '\
@@ -132,21 +132,21 @@ for prio_num_ in prio_num_arr:
 		threads.append(newthread)
 
 #Thread id
-thread_i=0
+thread_i = 0
 #A temporary array to store running threads
-tmp_threads=[]
+tmp_threads = []
 #The number of concurrent running threads
-concurrent_thread_num=0
+concurrent_thread_num = 0
 
 while True:
 	#If it is a legal thread and 'tmp_threads' still has capacity
-	if thread_i<len(threads) and len(tmp_threads)<max_thread_num:
+	if thread_i < len(threads) and len(tmp_threads) < max_thread_num:
 		tmp_threads.append(threads[thread_i])
-		concurrent_thread_num=concurrent_thread_num+1
-		thread_i=thread_i+1
+		concurrent_thread_num = concurrent_thread_num + 1
+		thread_i = thread_i + 1
 	#No more thread or 'tmp_threads' does not have any capacity
 	#'tmp_threads' is not empty
-	elif len(tmp_threads)>0:
+	elif len(tmp_threads) > 0:
 		print 'Start '+str(len(tmp_threads))+' threads\n'
 		#Run current threads in 'tmp_threads' right now!
 		for t in tmp_threads:
@@ -157,7 +157,7 @@ while True:
 		#Clear 'tmp_threads'
 		del tmp_threads[:]
 		#Reset
-		concurrent_thread_num=0
+		concurrent_thread_num = 0
 	#'tmp_threads' is empty
 	else:
 		break
