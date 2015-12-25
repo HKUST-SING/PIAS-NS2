@@ -14,59 +14,58 @@ class SimThread(threading.Thread):
 		os.system(self.cmd)
 
 
-sim_end=100000
-link_rate=10
-mean_link_delay=0.0000002
-host_delay=0.000020
-queueSize=267
-load_arr=[0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
-connections_per_pair=1
-meanFlowSize=1138*1460
-paretoShape=1.05
-flow_cdf='CDF_dctcp.tcl'
+sim_end = 100000
+link_rate = 10
+mean_link_delay = 0.0000002
+host_delay = 0.000020
+queueSize = 240
+load_arr = [0.9, 0.8, 0.7, 0.6, 0.5]
+connections_per_pair = 1
+meanFlowSize = 1138*1460
+paretoShape = 1.05
+flow_cdf = 'CDF_dctcp.tcl'
 
-enableMultiPath=1
-perflowMP=0
+enableMultiPath = 1
+perflowMP = 0
 
-sourceAlg='DCTCP-Sack'
+sourceAlg = 'DCTCP-Sack'
 #sourceAlg='LLDCT-Sack'
-initWindow=70
-ackRatio=1
-slowstartrestart='true'
-DCTCP_g=0.0625
-min_rto=0.002
-prob_cap_=5
+initWindow = 70
+ackRatio = 1
+slowstartrestart = 'true'
+DCTCP_g = 0.0625
+min_rto = 0.002
+prob_cap_ = 5
 
-switchAlg='Priority'
-DCTCP_K=80.0
-drop_prio_='true'
-prio_scheme_=2
-deque_prio_='true'
-keep_order_='true'
-prio_num_arr=[1,8]
-ECN_scheme_=2 #Per-port ECN marking
-pias_thresh_0=46*1460
-pias_thresh_1=1084*1460
-pias_thresh_2=1717*1460
-pias_thresh_3=1943*1460
-pias_thresh_4=1989*1460
-pias_thresh_5=1999*1460
-pias_thresh_6=2001*1460
+switchAlg = 'Priority'
+DCTCP_K = 65.0
+drop_prio_ = 'true'
+prio_scheme_ = 2
+deque_prio_ = 'true'
+keep_order_ = 'true'
+prio_num_arr = [1, 8]
+ECN_scheme_ = 2 #Per-port ECN marking
+pias_thresh_0 = [759*1460, 911*1460, 995*1460, 947*1460, 1069*1460]
+pias_thresh_1 = [1128*1460, 1331*1460, 1310*1460, 1372*1460, 1405*1460]
+pias_thresh_2 = [1458*1460, 1646*1460, 1569*1460, 1711*1460, 1649*1460]
+pias_thresh_3 = [1732*1460, 1959*1460, 1769*1460, 2023*1460, 1869*1460]
+pias_thresh_4 = [2001*1460, 2145*1460, 1955*1460, 2288*1460, 2003*1460]
+pias_thresh_5 = [2200*1460, 2330*1460, 2139*1460, 2545*1460, 2107*1460]
+pias_thresh_6 = [2334*1460, 2488*1460, 2313*1460, 2652*1460, 2176*1460]
 
-topology_spt=16
-topology_tors=9
-topology_spines=4
-topology_x=1
+topology_spt = 16
+topology_tors = 9
+topology_spines = 4
+topology_x = 1
 
-ns_path='/home/wei/pias/ns-allinone-2.34/ns-2.34/ns'
-sim_script='spine_empirical.tcl'
+ns_path = '/home/wei/pias/ns-allinone-2.34/ns-2.34/ns'
+sim_script = 'spine_empirical.tcl'
 
 threads=[]
-max_thread_num=18
-
+max_thread_num = 18
 
 for prio_num_ in prio_num_arr:
-	for load in load_arr:
+	for i in range(len(load_arr)):
 
 		scheme='unknown'
 		if switchAlg=='Priority' and prio_num_>1 and sourceAlg=='DCTCP-Sack':
@@ -82,7 +81,7 @@ for prio_num_ in prio_num_arr:
 			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
-		directory_name='websearch_%s_%d' % (scheme,int(load*10))
+		directory_name='websearch_%s_%d' % (scheme,int(load_arr[i]*10))
 		directory_name=directory_name.lower()
 		#Simulation command
 		cmd=ns_path+' '+sim_script+' '\
@@ -91,7 +90,7 @@ for prio_num_ in prio_num_arr:
 			+str(mean_link_delay)+' '\
 			+str(host_delay)+' '\
 			+str(queueSize)+' '\
-			+str(load)+' '\
+			+str(load_arr[i])+' '\
 			+str(connections_per_pair)+' '\
 			+str(meanFlowSize)+' '\
 			+str(paretoShape)+' '\
@@ -113,13 +112,13 @@ for prio_num_ in prio_num_arr:
 			+str(keep_order_)+' '\
 			+str(prio_num_)+' '\
 			+str(ECN_scheme_)+' '\
-			+str(pias_thresh_0)+' '\
-			+str(pias_thresh_1)+' '\
-			+str(pias_thresh_2)+' '\
-			+str(pias_thresh_3)+' '\
-			+str(pias_thresh_4)+' '\
-			+str(pias_thresh_5)+' '\
-			+str(pias_thresh_6)+' '\
+			+str(pias_thresh_0[i])+' '\
+			+str(pias_thresh_1[i])+' '\
+			+str(pias_thresh_2[i])+' '\
+			+str(pias_thresh_3[i])+' '\
+			+str(pias_thresh_4[i])+' '\
+			+str(pias_thresh_5[i])+' '\
+			+str(pias_thresh_6[i])+' '\
 			+str(topology_spt)+' '\
 			+str(topology_tors)+' '\
 			+str(topology_spines)+' '\
