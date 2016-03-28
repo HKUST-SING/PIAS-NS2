@@ -730,10 +730,6 @@ proc finish {} {
     set t [clock seconds]
     puts "Simulation Finished!"
     puts "Time [expr $t - $sim_start] sec"
-    #puts "Date [clock format [clock seconds]]"
-    if {$enableNAM != 0} {
-	close $namfile
-	exec nam out.nam &
-    }
+    
     exit 0
 }

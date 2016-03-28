@@ -123,7 +123,6 @@ if {[string compare $sourceAlg "DCTCP-Sack"] == 0} {
     Agent/TCPSink set ecnhat_ true
     Agent/TCP set ecnhat_g_ $DCTCP_g;
     Agent/TCP set lldct_ true
-
 }
 
 #Shuang
@@ -162,9 +161,9 @@ if {[string compare $switchAlg "Priority"] == 0 } {
 }
 
 if {$queueSize > $initWindow } {
-   Agent/TCP set maxcwnd_ [expr $queueSize - 1];
+    Agent/TCP set maxcwnd_ [expr $queueSize - 1];
 } else {
-   Agent/TCP set maxcwnd_ $initWindow
+    Agent/TCP set maxcwnd_ $initWindow
 }
 
 set myAgent "Agent/TCP/FullTcp/Sack/MinTCP";
@@ -252,20 +251,20 @@ set init_fid 0
 for {set j 0} {$j < $S } {incr j} {
     for {set i 0} {$i < $S } {incr i} {
         if {$i != $j} {
-	           set agtagr($i,$j) [new Agent_Aggr_pair]
-               $agtagr($i,$j) setup $s($i) $s($j) "$i $j" $connections_per_pair $init_fid "TCP_pair"
-               $agtagr($i,$j) attach-logfile $flowlog
+                set agtagr($i,$j) [new Agent_Aggr_pair]
+                $agtagr($i,$j) setup $s($i) $s($j) "$i $j" $connections_per_pair $init_fid "TCP_pair"
+                $agtagr($i,$j) attach-logfile $flowlog
 
-               puts -nonewline "($i,$j) "
-               #For Poisson/Pareto
-               $agtagr($i,$j) set_PCarrival_process [expr $lambda/($S - 1)] $flow_cdf [expr 17*$i+1244*$j] [expr 33*$i+4369*$j]
+                puts -nonewline "($i,$j) "
+                #For Poisson/Pareto
+                $agtagr($i,$j) set_PCarrival_process [expr $lambda/($S - 1)] $flow_cdf [expr 17*$i+1244*$j] [expr 33*$i+4369*$j]
 
-               $ns at 0.1 "$agtagr($i,$j) warmup 0.5 5"
-               $ns at 1 "$agtagr($i,$j) init_schedule"
+                $ns at 0.1 "$agtagr($i,$j) warmup 0.5 5"
+                $ns at 1 "$agtagr($i,$j) init_schedule"
 
-               set init_fid [expr $init_fid + $connections_per_pair];
-           }
-       }
+                set init_fid [expr $init_fid + $connections_per_pair];
+            }
+        }
 }
 
 puts "Initial agent creation done";flush stdout

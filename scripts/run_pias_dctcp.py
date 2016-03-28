@@ -1,18 +1,18 @@
 import threading
 import os
-import sys
+import Queue
 
-class SimThread(threading.Thread):
-	def __init__(self, cmd, directory_name):
-		self.cmd = cmd
-		self.directory_name = directory_name
-		threading.Thread.__init__(self)
-
-	def run(self):
+def worker():
+	while True:
+		try:
+			j = q.get(block = 0)
+		except Queue.Empty:
+			return
 		#Make directory to save results
-		os.system('mkdir ' + self.directory_name)
-		os.system(self.cmd)
+		os.system('mkdir '+j[1])
+		os.system(j[0])
 
+q = Queue.Queue()
 
 sim_end = 100000
 link_rate = 10
@@ -45,13 +45,13 @@ deque_prio_ = 'true'
 keep_order_ = 'true'
 prio_num_arr = [1, 8]
 ECN_scheme_ = 2 #Per-port ECN marking
-pias_thresh_0 = [759*1460, 911*1460, 995*1460, 947*1460, 1069*1460]
-pias_thresh_1 = [1128*1460, 1331*1460, 1310*1460, 1372*1460, 1405*1460]
-pias_thresh_2 = [1458*1460, 1646*1460, 1569*1460, 1711*1460, 1649*1460]
-pias_thresh_3 = [1732*1460, 1959*1460, 1769*1460, 2023*1460, 1869*1460]
-pias_thresh_4 = [2001*1460, 2145*1460, 1955*1460, 2288*1460, 2003*1460]
-pias_thresh_5 = [2200*1460, 2330*1460, 2139*1460, 2545*1460, 2107*1460]
-pias_thresh_6 = [2334*1460, 2488*1460, 2313*1460, 2652*1460, 2176*1460]
+pias_thresh_0 = [759*1460, 909*1460, 999*1460, 956*1460, 1059*1460]
+pias_thresh_1 = [1132*1460, 1329*1460, 1305*1460, 1381*1460, 1412*1460]
+pias_thresh_2 = [1456*1460, 1648*1460, 1564*1460, 1718*1460, 1643*1460]
+pias_thresh_3 = [1737*1460, 1960*1460, 1763*1460, 2028*1460, 1869*1460]
+pias_thresh_4 = [2010*1460, 2143*1460, 1956*1460, 2297*1460, 2008*1460]
+pias_thresh_5 = [2199*1460, 2337*1460, 2149*1460, 2551*1460, 2115*1460]
+pias_thresh_6 = [2325*1460, 2484*1460, 2309*1460, 2660*1460, 2184*1460]
 
 topology_spt = 16
 topology_tors = 9
@@ -60,9 +60,6 @@ topology_x = 1
 
 ns_path = '/home/wei/pias/ns-allinone-2.34/ns-2.34/ns'
 sim_script = 'spine_empirical.tcl'
-
-threads=[]
-max_thread_num = 18
 
 for prio_num_ in prio_num_arr:
 	for i in range(len(load_arr)):
@@ -81,7 +78,7 @@ for prio_num_ in prio_num_arr:
 			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
-		directory_name = 'websearch_%s_%d' % (scheme,int(load_arr[i]*10))
+		directory_name = 'websearch_%s_%d' % (scheme,int(load_arr[i]*100))
 		directory_name = directory_name.lower()
 		#Simulation command
 		cmd = ns_path+' '+sim_script+' '\
@@ -126,38 +123,18 @@ for prio_num_ in prio_num_arr:
 			+str('./'+directory_name+'/flow.tr')+'  >'\
 			+str('./'+directory_name+'/logFile.tr')
 
-		#Start thread to run simulation
-		print cmd
-		newthread=SimThread(cmd,directory_name)
-		threads.append(newthread)
+		q.put([cmd, directory_name])
 
-#Thread id
-thread_i = 0
-#A temporary array to store running threads
-tmp_threads = []
-#The number of concurrent running threads
-concurrent_thread_num = 0
+#Create all worker threads
+threads = []
+number_worker_threads = 20
 
-while True:
-	#If it is a legal thread and 'tmp_threads' still has capacity
-	if thread_i < len(threads) and len(tmp_threads) < max_thread_num:
-		tmp_threads.append(threads[thread_i])
-		concurrent_thread_num = concurrent_thread_num + 1
-		thread_i = thread_i + 1
-	#No more thread or 'tmp_threads' does not have any capacity
-	#'tmp_threads' is not empty
-	elif len(tmp_threads) > 0:
-		print 'Start '+str(len(tmp_threads))+' threads\n'
-		#Run current threads in 'tmp_threads' right now!
-		for t in tmp_threads:
-			t.start()
-		#Wait for all of them to finish
-		for t in tmp_threads:
-			t.join()
-		#Clear 'tmp_threads'
-		del tmp_threads[:]
-		#Reset
-		concurrent_thread_num = 0
-	#'tmp_threads' is empty
-	else:
-		break
+#Start threads to process jobs
+for i in range(number_worker_threads):
+	t = threading.Thread(target = worker)
+	threads.append(t)
+	t.start()
+
+#Join all completed threads
+for t in threads:
+	t.join()

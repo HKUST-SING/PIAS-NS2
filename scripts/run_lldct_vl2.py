@@ -1,18 +1,18 @@
 import threading
 import os
-import sys
+import Queue
 
-class SimThread(threading.Thread):
-	def __init__(self, cmd, directory_name):
-		self.cmd = cmd
-		self.directory_name = directory_name
-		threading.Thread.__init__(self)
-
-	def run(self):
+def worker():
+	while True:
+		try:
+			j = q.get(block = 0)
+		except Queue.Empty:
+			return
 		#Make directory to save results
-		os.system('mkdir ' + self.directory_name)
-		os.system(self.cmd)
+		os.system('mkdir '+j[1])
+		os.system(j[0])
 
+q = Queue.Queue()
 
 sim_end = 100000
 link_rate = 10
@@ -61,10 +61,6 @@ topology_x = 1
 ns_path = '/home/wei/pias/ns-allinone-2.34/ns-2.34/ns'
 sim_script = 'spine_empirical.tcl'
 
-threads = []
-max_thread_num = 18
-
-
 for prio_num_ in prio_num_arr:
 	for load in load_arr:
 
@@ -82,7 +78,7 @@ for prio_num_ in prio_num_arr:
 			sys.exit(0)
 
 		#Directory name: workload_scheme_load_[load]
-		directory_name = 'datamining_%s_%d' % (scheme, int(load*10))
+		directory_name = 'datamining_%s_%d' % (scheme, int(load*100))
 		directory_name = directory_name.lower()
 		#Simulation command
 		cmd = ns_path+' '+sim_script+' '\
@@ -127,38 +123,18 @@ for prio_num_ in prio_num_arr:
 			+str('./'+directory_name+'/flow.tr')+'  >'\
 			+str('./'+directory_name+'/logFile.tr')
 
-		#Start thread to run simulation
-		print cmd
-		newthread = SimThread(cmd, directory_name)
-		threads.append(newthread)
+		q.put([cmd, directory_name])
 
-#Thread id
-thread_i = 0
-#A temporary array to store running threads
-tmp_threads = []
-#The number of concurrent running threads
-concurrent_thread_num = 0
+#Create all worker threads
+threads = []
+number_worker_threads = 20
 
-while True:
-	#If it is a legal thread and 'tmp_threads' still has capacity
-	if thread_i < len(threads) and len(tmp_threads) < max_thread_num:
-		tmp_threads.append(threads[thread_i])
-		concurrent_thread_num = concurrent_thread_num + 1
-		thread_i = thread_i + 1
-	#No more thread or 'tmp_threads' does not have any capacity
-	#'tmp_threads' is not empty
-	elif len(tmp_threads) > 0:
-		print 'Start '+str(len(tmp_threads))+' threads\n'
-		#Run current threads in 'tmp_threads' right now!
-		for t in tmp_threads:
-			t.start()
-		#Wait for all of them to finish
-		for t in tmp_threads:
-			t.join()
-		#Clear 'tmp_threads'
-		del tmp_threads[:]
-		#Reset
-		concurrent_thread_num = 0
-	#'tmp_threads' is empty
-	else:
-		break
+#Start threads to process jobs
+for i in range(number_worker_threads):
+	t = threading.Thread(target = worker)
+	threads.append(t)
+	t.start()
+
+#Join all completed threads
+for t in threads:
+	t.join()
